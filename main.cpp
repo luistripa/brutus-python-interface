@@ -129,12 +129,6 @@ extern "C" {
             b.evolve(current_evolve_time);
 
             callback(result_string(b).c_str());
-
-            std::cout << std::endl;
-            std::cout << "Current time: " << current_evolve_time << std::endl;
-            // current_time == t_end?
-            std::cout << "Current time == t_end: " << (current_evolve_time == t_end) << std::endl;
-            std::cout << std::endl;
         
         } while (current_evolve_time < t_end);
     }
