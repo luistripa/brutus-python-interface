@@ -1,0 +1,13 @@
+.DS_Store
+.vscode/
+.idea/
+
+# Shared libraries
+*.dll
+*.so
+*.dylib
+
+# Build directories, caches, etc.
+build/
+__pycache__/
+*.egg-info/
