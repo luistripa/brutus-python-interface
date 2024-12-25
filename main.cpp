@@ -15,6 +15,9 @@
 #include "brutus_code/Brutus.h"
 
 
+#define MAX_TIME_PRECISION 1e10
+
+
 // The Cluster object is stored here. It is created in the initCluster() function that is called from the Python code
 std::unique_ptr<Cluster> cl;
 std::vector<int> star_identifiers;
@@ -41,13 +44,13 @@ std::string result_string(Brutus b)
     // Add the star data to the string
     for (int i = 0; i < cl.s.size(); i++) {
         result += std::to_string(star_identifiers[i]) + ","
-        + std::to_string(cl.s[i].m.toDouble()) + ","
         + std::to_string(cl.s[i].r[0].toDouble()) + ","
         + std::to_string(cl.s[i].r[1].toDouble()) + ","
         + std::to_string(cl.s[i].r[2].toDouble()) + ","
         + std::to_string(cl.s[i].v[0].toDouble()) + ","
         + std::to_string(cl.s[i].v[1].toDouble()) + ","
-        + std::to_string(cl.s[i].v[2].toDouble()) + ",";
+        + std::to_string(cl.s[i].v[2].toDouble()) + ","
+        + std::to_string(cl.s[i].m.toDouble()) + ",";
     }
     
     // Add the energy data to the string
@@ -120,9 +123,18 @@ extern "C" {
                 current_evolve_time = t_end;
             }
 
+            // Round the current time to avoid floating point errors
+            current_evolve_time = round(current_evolve_time * MAX_TIME_PRECISION) / MAX_TIME_PRECISION;
+
             b.evolve(current_evolve_time);
 
             callback(result_string(b).c_str());
+
+            std::cout << std::endl;
+            std::cout << "Current time: " << current_evolve_time << std::endl;
+            // current_time == t_end?
+            std::cout << "Current time == t_end: " << (current_evolve_time == t_end) << std::endl;
+            std::cout << std::endl;
         
         } while (current_evolve_time < t_end);
     }
