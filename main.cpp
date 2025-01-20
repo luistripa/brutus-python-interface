@@ -23,6 +23,9 @@ std::unique_ptr<Cluster> cl;
 std::vector<int> star_identifiers;
 
 
+/**
+ * Converts the Brutus simulation object to a string containing hthe current state of the simulation.
+ */
 std::string result_string(Brutus b)
 {
     mpreal t_current = b.get_t();
@@ -68,11 +71,8 @@ extern "C" {
     /**
      * Initializes a Cluster object for the simulation
      */
-    void initCluster(const char *seed)
+    void initCluster()
     {
-        hash<string> hasher;
-        mpfr::random(hasher(seed));  // This line seeds the random number generator
-
         cl = std::make_unique<Cluster>();   
     }
     

@@ -1,15 +1,19 @@
 
 import brutus as br
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
     # Create a cluster of stars
     cluster = br.Cluster(
+        name='example_cluster',
         stars=[
             br.Star(identifier=0, position=[0, 0, 0], velocity=[0, 0, 0], mass=1),
             br.Star(identifier=1, position=[1, 0, 0], velocity=[0, 1, 0], mass=1),
             br.Star(identifier=2, position=[0, 1, 0], velocity=[-1, 0, 0], mass=1),
-            br.Star(identifier=3, position=[0, -1, 0], velocity=[0, -1, 0], mass=1),
-            br.Star(identifier=4, position=[-1, 0, 0], velocity=[1, 1, 0], mass=1),
+            br.Star(identifier=3, position=[0, -2, 0], velocity=[0, -1, 0], mass=1),
+            br.Star(identifier=4, position=[-2, 0, 0], velocity=[1, 1, 0], mass=1),
         ],
     )
 

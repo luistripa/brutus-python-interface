@@ -2,10 +2,13 @@
 import multiprocessing as mp
 import subprocess as sp
 import os
+import logging
 import ctypes
 
 from ..common import Cluster
 from ..output import BaseOutput
+
+logger = logging.getLogger(__name__)
 
 abspath = os.path.abspath(__file__)
 lib_path = os.path.join(os.path.dirname(abspath), '..', 'lib', 'libmain.dylib')
@@ -20,14 +23,13 @@ class BrutusInterface:
     def __init__(self):
         self.lib = ctypes.CDLL(lib_path)
 
-        self.seed_t = ctypes.c_char_p
         self.time_t = ctypes.c_double
         self.star_identifier_t = ctypes.c_int
         self.mass_t = ctypes.c_double
         self.position_t = ctypes.c_double * 3
         self.velocity_t = ctypes.c_double * 3
 
-        self.lib.initCluster.argtypes = [self.seed_t]
+        self.lib.initCluster.argtypes = []
         self.lib.addStar.argtypes = [self.star_identifier_t, self.mass_t, self.position_t, self.velocity_t]
         self.lib.evolve.argtypes = [self.time_t, self.time_t, ctypes.CFUNCTYPE(None, ctypes.c_char_p)]
         self.lib.cleanup.argtypes = None
@@ -37,9 +39,9 @@ class BrutusInterface:
         self.lib.evolve.restype = None
         self.lib.cleanup.restype = None
 
-    def init_cluster(self, seed: str):
+    def init_cluster(self):
         """Initialize a cluster with the given seed."""
-        self.lib.initCluster(seed.encode("utf-8"))
+        self.lib.initCluster()
 
     def add_star(self, identifier: int, mass: float, position: tuple, velocity: tuple):
         """Add a star to the cluster with the given mass, position, and velocity."""
@@ -69,7 +71,7 @@ class BrutusIntegrator:
         Args:
             bulirsch_stoer_tolerance: The tolerance to use for the Bulirsch-Stoer integrator.
             word_length: The word length to use for the Bulirsch-Stoer integrator.
-            workers: The number of workers to use for parallel processing. Each worker will run a separate simulation.
+            workers: The number of workers to use for parallel processing. Each worker will run a separate simulation, meaning that the number of workers is the number of simulations that can be run in parallel.
         """
         self.time_step = time_step
         self.bulirsch_stoer_tolerance = bulirsch_stoer_tolerance
@@ -109,6 +111,7 @@ class BrutusIntegrator:
         return results
     
     def _simulate_cluster(self, cluster: Cluster, time: float, output_handler: BaseOutput | None):
+        logger.info(f'Started simulating cluster "{cluster.name}"')
         @ctypes.CFUNCTYPE(None, ctypes.c_char_p)
         def callback(line: bytes):
             line = line.decode()
@@ -117,7 +120,7 @@ class BrutusIntegrator:
                 output_handler.receive_output_line(line)
             
         interface = BrutusInterface()
-        interface.init_cluster("seed")  # TODO: Add seed to Cluster
+        interface.init_cluster()
 
         for star in cluster.stars:
             interface.add_star(star.identifier, star.mass, star.position, star.velocity)
@@ -130,4 +133,5 @@ class BrutusIntegrator:
             output_handler.finalize()
 
         result = output_handler.result() if output_handler else None
+        logger.info(f'Finished simulating cluster "{cluster.name}"')
         return result

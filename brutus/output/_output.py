@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import ctypes
 
 from ..common import Cluster
@@ -12,6 +13,9 @@ class BaseOutput:
     If you want to create a new output handler, you should start by subclassing this class and implementing the
     receive_output_line, finalize, and result methods.
     """
+    def __init__(self, cluster: Cluster):
+        self.cluster = cluster
+
     def receive_output_line(self, line: str):
         """Method that processes a single line of output from the simulation.
 
@@ -41,9 +45,10 @@ class RawOutput(BaseOutput):
 
     This output handler simply stores the raw output from the simulation as a list of strings.
     """
-    def __init__(self):
-        super().__init__()
-        self.data = []
+    def __init__(self, cluster):
+        super().__init__(cluster)
+
+        self.data = list()
 
     def receive_output_line(self, line: str):
         self.data.append(line)
@@ -53,6 +58,26 @@ class RawOutput(BaseOutput):
 
     def result(self):
         return self.data
+    
+
+class FileOutput(BaseOutput):
+    """Saves the simulation output to a CSV file."""
+
+    def __init__(self, cluster, folder: os.PathLike):
+        super().__init__(cluster)
+
+        self.path = os.path.join(folder, f'{self.cluster.name}.csv')
+        self.data = list()
+
+    def receive_output_line(self, line):
+        self.data.append( line )
+
+    def finalize(self):
+        with open(self.path, 'w') as f:
+            f.write('\n'.join(self.data))
+
+    def result(self):
+        pass
 
 
 class PandasOutput(BaseOutput):
@@ -68,17 +93,14 @@ class PandasOutput(BaseOutput):
     - kinetic_energy: The kinetic energy of the system
     - potential_energy: The potential energy of the system
     """
-    def __init__(self, cluster: Cluster, sep: str = ','):
-        super().__init__()
-
-        self.cluster = cluster
-        self.sep = sep
+    def __init__(self, cluster: Cluster):
+        super().__init__(cluster)
 
         self.data = []  # Stores the output data as a list of dictionaries, which will be converted to a DataFrame on finalize
         self.df: pd.DataFrame | None = None  # Stores the final DataFrame
 
     def receive_output_line(self, line: str):
-        values = line.strip().split(self.sep)
+        values = line.strip().split(',')
         row = PandasOutput._parse_output_line(values)
         self.data.append(row)
 

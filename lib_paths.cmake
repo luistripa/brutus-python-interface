@@ -1,2 +1,4 @@
-set(MPFR_INCLUDE_PATH /opt/homebrew/Cellar/mpfr/4.2.1/include)
-set(GMP_INCLUDE_PATH /opt/homebrew/Cellar/gmp/6.3.0/include)
+# Update the following paths to match the paths to MPFR and GMP include folders on your system
+
+set(MPFR_INCLUDE_PATH /opt/homebrew/opt/mpfr/include)
+set(GMP_INCLUDE_PATH /opt/homebrew/opt/gmp/include)
