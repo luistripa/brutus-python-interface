@@ -6,6 +6,7 @@
 #include <numeric> 
 #include <cstdlib>
 #include <fstream>
+#include <memory>
 
 #include "lib/mpreal/mpreal.h"
 
