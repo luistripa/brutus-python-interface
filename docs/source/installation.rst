@@ -26,6 +26,14 @@ Step 0 - Clone the repository
 
 The first step is to clone the repository to your local machine. This can be done using GIT or by downloading the repository as a ZIP file from the GitHub page.
 
+After cloning the main project, you must add the mpreal submodule to the project. This is done by following the following command:
+
+.. code-block:: bash
+
+    git submodule add https://github.com/advanpix/mpreal.git lib/mpreal
+
+This will create the directory `lib/mpreal`, which contains the mpreal library. This library is used to perform high-precision arithmetic operations in Brutus.
+
 Step 1 - Install the dependencies
 ---------------------------------
 
@@ -61,7 +69,10 @@ The first step is to install the dependencies. The exact process will depend on 
 Step 2 - Update the CMake configuration
 ---------------------------------------
 
-The next step is to update the CMake configuration to point to the MPFR and GMP libraries, which will have to be built with and linked to the project. Firstly, you have to find the paths to the MPFR and GMP libraries, which can be done with the following commands:
+The next step is to update the CMake configuration to point to the MPFR and GMP libraries, which will have to be built with and linked to the project.
+
+Firstly, you have to find the paths to the MPFR and GMP libraries and update the `lib_paths.cmake` file with the corresponding paths.
+This is done differently depending on your operating system:
 
 **For MacOS using Homebrew**:
 
@@ -71,20 +82,13 @@ The next step is to update the CMake configuration to point to the MPFR and GMP 
     brew --prefix mpfr
 
     # Returns the path to the GMP library
-    brew --prefix gmp  
+    brew --prefix gmp
+
+Next append the "include" suffix to the returned paths. For example, the path `/opt/homebrew/Cellar/mpfr` should be updated to `/opt/homebrew/Cellar/mpfr/include` before being added to the `lib_paths.cmake` file.
 
 **For Ubuntu/Debian**:
 
-.. code-block:: bash
-
-    # Returns the path to the MPFR library
-    ldconfig -p | grep mpfr
-
-    # Returns the path to the GMP library
-    ldconfig -p | grep gmp
-
-Secondly, the `lib_paths.cmake` file in the project's root folder has to be updated with the paths to the MPFR and GMP libraries. However, **append the "include" suffix to the returned paths**. For example, the path `/opt/homebrew/Cellar/mpfr` should be updated to `/opt/homebrew/Cellar/mpfr/include` before
-being added to the `lib_paths.cmake` file.
+For linux distributions the packages should be installed in the default paths, which means that the include paths should be both set to `/usr/include`.
 
 The resulting file should look like this (please update the paths according to your system):
 
