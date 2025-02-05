@@ -11,7 +11,18 @@ from ..output import BaseOutput
 logger = logging.getLogger(__name__)
 
 abspath = os.path.abspath(__file__)
-lib_path = os.path.join(os.path.dirname(abspath), '..', 'lib', 'libmain.dylib')
+
+dylib_path = os.path.join(os.path.dirname(abspath), '..', 'lib', 'libmain.dylib')
+so_path = os.path.join(os.path.dirname(abspath), '..', 'lib', 'libmain.so')
+
+if os.path.exists(dylib_path):
+    lib_path = dylib_path
+
+elif os.path.exists(so_path):
+    lib_path = so_path
+
+else:
+    raise FileNotFoundError('Could not find the Brutus compiled library file. Make sure you compiled it correctly. If everything seems right, open an issue on GitHub.')
 
 
 class BrutusInterface:
